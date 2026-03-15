@@ -1,0 +1,87 @@
+# =============================================================================
+# Janitor — Proxmox AI Monitoring Agent
+# Copy this file to config.yaml and fill in your real values.
+# config.yaml is gitignored and will never be committed.
+# =============================================================================
+
+proxmox_servers:
+  - name: "pve-prod-01"
+    host: "192.168.1.10"
+    port: 8006
+    user: "root@pam"
+    auth:
+      method: "token"               # "token" | "ssh_key"
+      token_name: "janitor"
+      token_value: "CHANGE_ME"      # or use ${ENV_VAR} syntax
+    verify_ssl: false
+    ssh:
+      host: "192.168.1.10"          # SSH host (may differ from API host)
+      port: 22
+      user: "root"
+      key_path: "~/.ssh/id_ed25519" # overrides global ssh.key_path
+
+  # Add more servers as needed:
+  # - name: "pve-prod-02"
+  #   host: "192.168.1.11"
+  #   port: 8006
+  #   user: "root@pam"
+  #   auth:
+  #     method: "ssh_key"
+  #   verify_ssl: false
+
+notifications:
+  discord:
+    enabled: true
+    bot_token: "CHANGE_ME"           # or ${DISCORD_BOT_TOKEN}
+    channel_id: 123456789012345678   # main channel for bot commands
+    alert_channel_id: null           # optional dedicated alert channel
+
+  telegram:
+    enabled: false
+    bot_token: "CHANGE_ME"           # or ${TELEGRAM_BOT_TOKEN}
+    chat_id: -1001234567890
+
+ai:
+  provider: "anthropic"              # "anthropic" | "openai" | "openrouter" | "ollama"
+  model: "claude-sonnet-4-6"
+  api_key: "CHANGE_ME"              # or ${ANTHROPIC_API_KEY}
+  base_url: null                     # set for openrouter/ollama:
+  # openrouter: "https://openrouter.ai/api/v1"
+  # ollama:     "http://localhost:11434/v1"
+  max_tokens: 4096
+  temperature: 0.2
+
+permissions:
+  level: "semi_auto"                 # "read_only" | "suggest" | "semi_auto" | "full_auto"
+  allow_actions:                     # auto-executed in semi_auto mode
+    - "restart_vm"
+    - "restart_service"
+  deny_actions:                      # always blocked regardless of level
+    - "run_ssh_command"
+
+monitoring:
+  check_interval_seconds: 60
+  alert_cooldown_seconds: 300        # minimum seconds between repeat alerts
+
+  thresholds:
+    cpu_percent: 90
+    ram_percent: 85
+    disk_percent: 80
+    load_avg_1m: 8.0
+    network_errors_per_min: 50
+
+  checks:
+    node_metrics: true
+    vm_status: true
+    cluster_health: true
+    storage_pools: true
+    smart_disk_health: true          # requires SSH access
+    proxmox_services: true           # requires SSH access
+    system_logs: true                # requires SSH access
+
+  log_lines_for_context: 100         # lines of journal fed to AI on alert
+
+ssh:
+  key_path: "~/.ssh/id_ed25519"     # global fallback SSH key
+  known_hosts_policy: "auto_add"    # "strict" | "auto_add" | "ignore"
+  connect_timeout_seconds: 10

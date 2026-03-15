@@ -1,0 +1,16 @@
+config.yaml
+.env
+*.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+*.log
+*.db
+.DS_Store
+.claude/

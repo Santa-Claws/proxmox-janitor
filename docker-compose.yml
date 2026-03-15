@@ -1,0 +1,17 @@
+services:
+  janitor:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ~/.ssh:/root/.ssh:ro
+    environment:
+      - JANITOR_CONFIG=/app/config.yaml
+      # Alternatively, pass secrets via env vars:
+      # - DISCORD_BOT_TOKEN=your_token_here
+      # - ANTHROPIC_API_KEY=your_key_here
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
